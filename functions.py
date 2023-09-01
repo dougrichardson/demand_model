@@ -11,6 +11,8 @@ from sklearn.model_selection import LeaveOneGroupOut
 
 from sklearn.feature_selection import SequentialFeatureSelector
 
+from mlxtend.feature_selection import SequentialFeatureSelector
+
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error, mean_absolute_percentage_error, median_absolute_error
 
 from sklearn.inspection import permutation_importance
@@ -48,6 +50,21 @@ def sfs(train_X, train_y, model, cv, direction="forward", tol=0.001, scoring="r2
     scoring: score to use in CV
     """
     s = SequentialFeatureSelector(model, direction=direction, tol=tol, scoring=scoring, cv=cv)
+    return s.fit(train_X, train_y)
+
+def mlextend_sfs(train_X, train_y, rf, cv, forward, scoring, k_features="best"):
+    """
+    mlextend Forward selection of features using CV, and a chosen score with tolerance.
+    
+    train_X: training data
+    train_y: training target
+    rf: RandomForestRegressor
+    cv: the cross validation to do. See docs for RandomizedSearchCV
+    forward: bool, forward or backward selection
+    tol: tolerance for scoring
+    scoring: score to use in CV
+    """
+    s = SequentialFeatureSelector(rf, k_features=k_features, forward=forward, scoring=scoring, cv=cv)
     return s.fit(train_X, train_y)
 
 def leave_one_group_out(train_X, train_y, target_da, first_year, last_year):
