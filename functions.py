@@ -23,6 +23,16 @@ from scipy.stats import randint, uniform
 # Machine learning
 # =======================================
 
+def sel_train_test(df, first_train_year, last_test_year):
+    """
+    Selects df for training and test years. Might be used to e.g.
+    exclude a validation set.
+    
+    df: dataframe
+    first_train_year, last_test_year: int, first year of training set and last year of test set
+    """
+    return df[(df.index.year >= first_train_year) & (df.index.year <= last_test_year)]
+
 def split(df, target_name, test_size, random_state, shuffle=True):
     """
     Apply train_test_split to dataframe
