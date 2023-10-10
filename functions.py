@@ -237,6 +237,38 @@ def add_time_column(df, method):
     df[method] = new_col
     return df
 
+def rm_weekend(da):
+    """
+    Set weekend days to NaN
+    """
+    return da.where(da.time.dt.dayofweek < 5, drop=False)
+
+def rm_xmas(da):
+    """
+    Set 21/12 through 06/01 to NaN
+    """
+    da_ = da.where(
+        da.where(
+            (da.time.dt.month == 12) & 
+            (da.time.dt.day > 20)
+        ).isnull()
+    )
+    da_ = da_.where(
+        da_.where(
+            (da_.time.dt.month == 1) & 
+            (da_.time.dt.day < 7)
+        ).isnull()
+    )
+    return da_
+
+def rm_month(da, month):
+    """
+    Set a particular month to NaN
+    """
+    if month not in range(1, 13):
+        raise ValueError("Month must be integer between 1 and 12")
+    return da.where(da.time.dt.month != month)
+
 # =======================================
 # Data wrangling
 # =======================================
