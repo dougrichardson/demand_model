@@ -6,6 +6,7 @@
 # =================================
 
 # Import libraries
+import sys
 import os
 import glob
 import xarray as xr
@@ -26,29 +27,47 @@ os.chdir('/g/data/w42/dr6273/work/demand_model/')
 import functions as fn
 
 # Set global variables
-
-PATH = "/g/data/w42/dr6273/work/projects/Aus_energy/"
-DEMAND_FILE = "daily_demand_2010-2020_stl.nc"
-MARKET = "NEM" # "NEM" or "EU"
-REGION = "NSW"
-REMOVE_WEEKEND = False
-REMOVE_XMAS = False
-REMOVE_MONTH = None # integer: [1, 12]
-MASK_NAME = "pop_dens_mask"
-TIME_COLUMNS = ["is_weekend"]
+print("Starting")
+PATH = sys.argv[1] # "/g/data/w42/dr6273/work/projects/Aus_energy/"
+DEMAND_FILE = sys.argv[2] #"daily_demand_2010-2020_stl.nc"
+MARKET = sys.argv[3] #"NEM" # "NEM" or "EU"
+REGION = sys.argv[4] #"NSW"
+REMOVE_WEEKEND = sys.argv[5] #False
+REMOVE_XMAS = sys.argv[6] #False
+REMOVE_MONTH = int(sys.argv[7]) #0 # integer: [1, 12]
+MASK_NAME = sys.argv[8] #"pop_dens_mask"
+TIME_COLUMNS = sys.argv[9] #["is_weekend"]
 # Alternatives:
-# time_cols = ["is_weekend", "month_sin", "month_cos"]
-# time_cols = ["is_weekend", "month_int"]
-# time_cols = ["is_weekend", "season_int"]
-# time_cols = ["is_weekend", "is_transition"]
+# time_cols = ["is_weekend","month_sin", "month_cos"]
+# time_cols = ["is_weekend","month_int"]
+# time_cols = ["is_weekend","season_int"]
+# time_cols = ["is_weekend","is_transition"]
 # time_cols = []
-FIRST_TRAIN_YEAR = 2010
-LAST_TRAIN_YEAR = 2011
-FIRST_TEST_YEAR = 2012
-LAST_TEST_YEAR = 2012
+FIRST_TRAIN_YEAR = int(sys.argv[10]) #2010
+LAST_TRAIN_YEAR = int(sys.argv[11]) #2011
+FIRST_TEST_YEAR = int(sys.argv[12]) #2012
+LAST_TEST_YEAR = int(sys.argv[13]) #2012
+
+# Convert str to required type
+# Str to bool
+if REMOVE_WEEKEND == "True":
+    REMOVE_WEEKEND = True
+else:
+    REMOVE_WEEKEND = False
+    
+if REMOVE_XMAS == "True":
+    REMOVE_XMAS = True
+else:
+    REMOVE_XMAS = False
+
+# Str to list
+if TIME_COLUMNS == "":
+    TIME_COLUMNS = []
+else:
+    TIME_COLUMNS = TIME_COLUMNS.split(",")
 
 # Prepare demand data
-def remove_time(da, weekend=False, xmas=False, month=None):
+def remove_time(da, weekend=False, xmas=False, month=0):
     """
     Returns da with weekends, xmas, or a month removed if desired
     """
@@ -56,7 +75,7 @@ def remove_time(da, weekend=False, xmas=False, month=None):
         da = fn.rm_weekend(da)
     if REMOVE_XMAS:
         da = fn.rm_xmas(da)
-    if REMOVE_MONTH is not None:
+    if REMOVE_MONTH > 0:
         da = fn.rm_month(da, REMOVE_MONTH)
         
     return da.dropna("time")
@@ -135,7 +154,7 @@ def get_filename(
         filename += "_NOWEEKEND"
     if xmas:
         filename += "_NOXMAS"
-    if month is not None:
+    if month > 0:
         filename = filename + "_NOMONTH" + str(month)
         
     filename =  filename + "_training" + str(first_train_year) + "-" + str(last_train_year)
