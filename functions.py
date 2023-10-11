@@ -88,7 +88,6 @@ def leave_one_group_out(train_X, train_y, target_da, first_year, last_year):
     """
     logo = LeaveOneGroupOut()
     groups = target_da.sel(time=slice(first_year, last_year)).time.dt.year.values
-    print(groups)
     return logo.split(train_X, train_y, groups=groups)
 
 def tune_hyperparameters(
