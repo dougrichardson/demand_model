@@ -1,5 +1,5 @@
 **/*__pycache__/
 **/*.ipynb_checkpoints/
-**/*.logs/
+**/logs/
 run_multiple_random_forest.sh.*
 jupyter_instructions.txt

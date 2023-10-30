@@ -27,7 +27,6 @@ os.chdir('/g/data/w42/dr6273/work/demand_model/')
 import functions as fn
 
 # Set global variables
-print("Starting")
 PATH = sys.argv[1] # "/g/data/w42/dr6273/work/projects/Aus_energy/"
 DEMAND_FILE = sys.argv[2] #"daily_demand_2010-2020_stl.nc"
 MARKET = sys.argv[3] #"NEM" # "NEM" or "EU"
@@ -99,7 +98,7 @@ for region in dem_da.region.values:
     new_cols = np.append(np.append("demand", TIME_COLUMNS), df.columns[:-(len(TIME_COLUMNS) + 1)])
     df = df[new_cols]
     region_dfs[region] = df
-region_dfs[REGION] = region_dfs[REGION][["demand", "hdd", "cdd"]]
+# region_dfs[REGION] = region_dfs[REGION][["demand", "hdd", "cdd"]]
 
 # Split data into training and testing
 
@@ -173,22 +172,22 @@ results_df.to_csv(
 )
 
 #  Tune hyperparameters
-# 
 # Using leave one group out cross validation, where a group is a year.
-# parameters = {
-#     "n_estimators": randint(200, 500), # no. trees in the forest
-#     "min_samples_leaf": randint(5, 30), # min no. samples at leaf node
-#     "max_depth" : randint(5, 50), # max depth of each tree
-#     "max_leaf_nodes": randint(20, 200) # size of tree, how many end nodes
-# }
+parameters = {
+    "n_estimators": randint(200, 500), # no. trees in the forest
+    "min_samples_leaf": randint(5, 30), # min no. samples at leaf node
+    "max_depth" : randint(5, 50), # max depth of each tree
+    "max_leaf_nodes": randint(20, 200) # size of tree, how many end nodes
+}
 
 # ========================= !!!!!!!!!!!!!!!!!!!!!!  very restricted space for TESTING
-parameters = {
-    "n_estimators": randint(20, 22), # no. trees in the forest
-    "min_samples_leaf": randint(5, 7), # min no. samples at leaf node
-    "max_depth" : randint(5, 7), # max depth of each tree
-    "max_leaf_nodes": randint(20, 22) # size of tree, how many end nodes
-}
+# parameters = {
+#     "n_estimators": randint(20, 22), # no. trees in the forest
+#     "min_samples_leaf": randint(5, 7), # min no. samples at leaf node
+#     "max_depth" : randint(5, 7), # max depth of each tree
+#     "max_leaf_nodes": randint(20, 22) # size of tree, how many end nodes
+# }
+# ========================= !!!!!!!!!!!!!!!!!!!!!!
 
 retain = ["demand"] + selected_features
 final_features = region_dfs[region][retain]
@@ -211,8 +210,10 @@ logo = fn.leave_one_group_out(
     str(LAST_TRAIN_YEAR)
 )
 
-# !!!!!!!!!!!!!!!!!!!!!!!!! CHANGE n_iter
-best_params = fn.tune_hyperparameters(train_X, train_y, rf, parameters, logo, n_iter=3)
+# !!!!!!!!!!!!!!!!!!!!!!!!! CHANGE n_iter for actual runs
+# ========================= !!!!!!!!!!!!!!!!!!!!!!
+# ========================= !!!!!!!!!!!!!!!!!!!!!!
+best_params = fn.tune_hyperparameters(train_X, train_y, rf, parameters, logo, n_iter=200)
 best_params_df = pd.Series(
     [best_params[i] for i in list(best_params.keys())],
     index=list(best_params.keys())
