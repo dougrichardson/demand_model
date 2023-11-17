@@ -125,7 +125,15 @@ logo = fn.leave_one_group_out(
     str(LAST_TRAIN_YEAR)
 )
 
-model = fn.mlextend_sfs(train_X, train_y, rf, list(logo), True, scoring="neg_mean_absolute_error")
+model = fn.mlextend_sfs(
+    train_X,
+    train_y,
+    rf,
+    list(logo),
+    True,
+    scoring="neg_mean_absolute_error",
+    k_features="best"
+)
 
 features = region_dfs[region].columns[1:]
 selected_features = list(features[list(model.k_feature_idx_)])
