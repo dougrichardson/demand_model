@@ -17,7 +17,7 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error, m
 
 from sklearn.inspection import permutation_importance
 
-from scipy.stats import randint, uniform
+from scipy.stats import randint, uniform, pearsonr
 
 # =======================================
 # Machine learning
@@ -150,6 +150,9 @@ def compute_scores(y_true, y_pred, metrics):
     for metric in metrics:
         s = metric(y_true, y_pred)
         scores.append(s)
+    # Also compute Pearson correlation
+    cor = pearsonr(y_true, y_pred)[0]
+    scores.append(cor)
     return scores
 
 def perm_imp(model, X, y, n_repeats, random_state=0):
