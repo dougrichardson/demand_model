@@ -148,6 +148,9 @@ feature_names = [
 
 results_df["feature_names"] = feature_names
 
+# Boolean column indicating which model was selected (useful for reading this dataframe back later)
+results_df["selected_features"] = [len(i) == len(selected_features) for i in results_df["feature_idx"]]
+
 # Write results to file
 def get_filename(
     filename, market, region, mask_name,
