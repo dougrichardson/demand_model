@@ -46,6 +46,7 @@ FIRST_TRAIN_YEAR = int(sys.argv[10]) #2010
 LAST_TRAIN_YEAR = int(sys.argv[11]) #2011
 FIRST_TEST_YEAR = int(sys.argv[12]) #2012
 LAST_TEST_YEAR = int(sys.argv[13]) #2012
+N_FEATURES = sys.argv[14] # "best" or "parsimonious". For feature selection
 
 # Convert str to required type
 # Str to bool
@@ -132,7 +133,7 @@ model = fn.mlextend_sfs(
     list(logo),
     True,
     scoring="neg_mean_absolute_error",
-    k_features="best"
+    k_features=N_FEATURES
 )
 
 features = region_dfs[region].columns[1:]
@@ -151,7 +152,7 @@ results_df["feature_names"] = feature_names
 def get_filename(
     filename, market, region, mask_name,
     first_train_year, last_train_year, first_test_year, last_test_year,
-    weekend=False, xmas=False, month=None
+    weekend=False, xmas=False, month=None, nFeatures=None
 ):
     """
     Return a filename appropriate for the modelling choices made.
@@ -167,12 +168,15 @@ def get_filename(
     filename =  filename + "_training" + str(first_train_year) + "-" + str(last_train_year)
     filename = filename + "_test" + str(first_test_year) + "-" + str(last_test_year)
     
+    if nFeatures is not None:
+        filename = filename + "_nFeatures-" + nFeatures
+    
     return filename
 
 filename = get_filename(
     "feature_selection_results", MARKET, REGION, MASK_NAME,
     FIRST_TRAIN_YEAR, LAST_TRAIN_YEAR, FIRST_TEST_YEAR, LAST_TEST_YEAR,
-    REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH
+    REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH, N_FEATURES
 )
 
 results_df.to_csv(
@@ -230,7 +234,7 @@ best_params_df = pd.Series(
 filename = get_filename(
     "hyperparameters", MARKET, REGION, MASK_NAME,
     FIRST_TRAIN_YEAR, LAST_TRAIN_YEAR, FIRST_TEST_YEAR, LAST_TEST_YEAR,
-    REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH
+    REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH, N_FEATURES
 )
 best_params_df.to_csv(
     PATH + "model_results/hyperparameters/random_forest/" + filename + ".csv",
@@ -258,7 +262,7 @@ train_df = pd.DataFrame(
 filename = get_filename(
     "training_predictions", MARKET, REGION, MASK_NAME,
     FIRST_TRAIN_YEAR, LAST_TRAIN_YEAR, FIRST_TEST_YEAR, LAST_TEST_YEAR,
-    REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH
+    REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH, N_FEATURES
 )
 train_df.to_csv(
     PATH + "model_results/training/random_forest/" + filename + ".csv",
@@ -273,7 +277,7 @@ test_df = pd.DataFrame(
 filename = get_filename(
     "test_predictions", MARKET, REGION, MASK_NAME,
     FIRST_TRAIN_YEAR, LAST_TRAIN_YEAR, FIRST_TEST_YEAR, LAST_TEST_YEAR,
-    REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH
+    REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH, N_FEATURES
 )
 test_df.to_csv(
     PATH + "model_results/test/random_forest/" + filename + ".csv",
