@@ -271,6 +271,52 @@ def rm_month(da, month):
         raise ValueError("Month must be integer between 1 and 12")
     return da.where(da.time.dt.month != month)
 
+def get_filename(
+    filename, market, region, mask_name,
+    first_train_year, last_train_year, first_test_year, last_test_year,
+    weekend=False, xmas=False, month=None, nFeatures=None
+):
+    """
+    Return a filename appropriate for the modelling choices made.
+    """
+    filename = filename + "_" + market + "_" + region + "_" + mask_name
+    if weekend:
+        filename += "_NOWEEKEND"
+    if xmas:
+        filename += "_NOXMAS"
+    if month > 0:
+        filename = filename + "_NOMONTH" + str(month)
+        
+    filename =  filename + "_training" + str(first_train_year) + "-" + str(last_train_year)
+    filename = filename + "_test" + str(first_test_year) + "-" + str(last_test_year)
+    
+    if nFeatures is not None:
+        filename = filename + "_nFeatures-" + nFeatures
+    
+    return filename
+
+# def read_results(
+#     path,
+#     filename, market, regions, mask_name,
+#     first_train_year, last_train_year, first_test_year, last_test_year,
+#     weekend=False, xmas=False, month=None, nFeatures=None
+# ):
+#     """
+#     Read in results dataframes as dictionary items
+#     """
+#     results = dict()
+#     for r in regions:
+#         filename = get_filename(
+#             filename, market, r, mask_name,
+#             first_train_year, last_train_year, first_test_year, last_test_year,
+#             weekend, xmas, month, nFeatures
+#         )
+#         results[r] = pd.read_csv(
+#             path + "/" + filename + "/random_forest/" + filename + ".csv",
+#             index_col=0
+#         )
+#     return results
+
 # =======================================
 # Data wrangling
 # =======================================

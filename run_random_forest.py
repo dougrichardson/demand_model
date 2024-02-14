@@ -152,31 +152,7 @@ results_df["feature_names"] = feature_names
 results_df["selected_features"] = [len(i) == len(selected_features) for i in results_df["feature_idx"]]
 
 # Write results to file
-def get_filename(
-    filename, market, region, mask_name,
-    first_train_year, last_train_year, first_test_year, last_test_year,
-    weekend=False, xmas=False, month=None, nFeatures=None
-):
-    """
-    Return a filename appropriate for the modelling choices made.
-    """
-    filename = filename + "_" + market + "_" + region + "_" + mask_name
-    if weekend:
-        filename += "_NOWEEKEND"
-    if xmas:
-        filename += "_NOXMAS"
-    if month > 0:
-        filename = filename + "_NOMONTH" + str(month)
-        
-    filename =  filename + "_training" + str(first_train_year) + "-" + str(last_train_year)
-    filename = filename + "_test" + str(first_test_year) + "-" + str(last_test_year)
-    
-    if nFeatures is not None:
-        filename = filename + "_nFeatures-" + nFeatures
-    
-    return filename
-
-filename = get_filename(
+filename = fn.get_filename(
     "feature_selection_results", MARKET, REGION, MASK_NAME,
     FIRST_TRAIN_YEAR, LAST_TRAIN_YEAR, FIRST_TEST_YEAR, LAST_TEST_YEAR,
     REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH, N_FEATURES
@@ -234,7 +210,7 @@ best_params_df = pd.Series(
     index=list(best_params.keys())
 )
 
-filename = get_filename(
+filename = fn.get_filename(
     "hyperparameters", MARKET, REGION, MASK_NAME,
     FIRST_TRAIN_YEAR, LAST_TRAIN_YEAR, FIRST_TEST_YEAR, LAST_TEST_YEAR,
     REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH, N_FEATURES
@@ -262,7 +238,7 @@ train_df = pd.DataFrame(
     columns=["observation", "prediction"],
     index=dem_da.sel(time=slice(str(FIRST_TRAIN_YEAR), str(LAST_TRAIN_YEAR))).time
 )
-filename = get_filename(
+filename = fn.get_filename(
     "training_predictions", MARKET, REGION, MASK_NAME,
     FIRST_TRAIN_YEAR, LAST_TRAIN_YEAR, FIRST_TEST_YEAR, LAST_TEST_YEAR,
     REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH, N_FEATURES
@@ -277,7 +253,7 @@ test_df = pd.DataFrame(
     columns=["observation", "prediction"],
     index=dem_da.sel(time=slice(str(FIRST_TEST_YEAR), str(LAST_TEST_YEAR))).time
 )
-filename = get_filename(
+filename = fn.get_filename(
     "test_predictions", MARKET, REGION, MASK_NAME,
     FIRST_TRAIN_YEAR, LAST_TRAIN_YEAR, FIRST_TEST_YEAR, LAST_TEST_YEAR,
     REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH, N_FEATURES
