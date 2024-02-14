@@ -61,7 +61,7 @@ else:
     REMOVE_XMAS = False
 
 # Str to list
-if TIME_COLUMNS == "":
+if TIME_COLUMNS == "None":
     TIME_COLUMNS = []
 else:
     TIME_COLUMNS = TIME_COLUMNS.split(",")
