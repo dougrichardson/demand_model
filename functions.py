@@ -239,11 +239,11 @@ def add_time_column(df, method):
     df[method] = new_col
     return df
 
-def rm_weekend(da):
+def rm_weekend(da, drop=False):
     """
     Set weekend days to NaN
     """
-    return da.where(da.time.dt.dayofweek < 5, drop=False)
+    return da.where(da.time.dt.dayofweek < 5, drop=drop)
 
 def rm_xmas(da):
     """
