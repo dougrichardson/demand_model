@@ -41,7 +41,7 @@ TIME_COLUMNS = sys.argv[9] #["is_weekend"]
 # time_cols = ["is_weekend","month_int"]
 # time_cols = ["is_weekend","season_int"]
 # time_cols = ["is_weekend","is_transition"]
-# time_cols = []
+# time_cols = None
 FIRST_TRAIN_YEAR = int(sys.argv[10]) #2010
 LAST_TRAIN_YEAR = int(sys.argv[11]) #2011
 FIRST_TEST_YEAR = int(sys.argv[12]) #2012
@@ -66,29 +66,29 @@ if TIME_COLUMNS == "None":
 else:
     TIME_COLUMNS = TIME_COLUMNS.split(",")
 
-# Prepare demand data
-def remove_time(da, weekend=False, xmas=False, month=0):
-    """
-    Returns da with weekends, xmas, or a month removed if desired
-    """
-    if REMOVE_WEEKEND:
-        da = fn.rm_weekend(da)
-    if REMOVE_XMAS:
-        da = fn.rm_xmas(da)
-    if REMOVE_MONTH > 0:
-        da = fn.rm_month(da, REMOVE_MONTH)
+# # Prepare demand data
+# def remove_time(da, weekend=False, xmas=False, month=0):
+#     """
+#     Returns da with weekends, xmas, or a month removed if desired
+#     """
+#     if REMOVE_WEEKEND:
+#         da = fn.rm_weekend(da)
+#     if REMOVE_XMAS:
+#         da = fn.rm_xmas(da)
+#     if REMOVE_MONTH > 0:
+#         da = fn.rm_month(da, REMOVE_MONTH)
         
-    return da.dropna("time")
+#     return da.dropna("time")
 
 dem_da = xr.open_dataset(PATH + "data/energy_demand/" + DEMAND_FILE)["demand_stl"]
-dem_da = remove_time(dem_da, REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH)
+dem_da = fn.remove_time(dem_da, REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH)
 dem_da = dem_da.sel(region=REGION).expand_dims({"region": [REGION]})
 
 # Prepare predictors
 files = fn.get_predictor_files(MARKET, MASK_NAME)
 pred_ds = xr.open_mfdataset(files, combine="nested", compat="override")
 pred_ds = pred_ds.sel(region=REGION).expand_dims({"region": [REGION]}).compute()
-pred_ds = remove_time(pred_ds, REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH)
+pred_ds = fn.remove_time(pred_ds, REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH)
 
 # Prepare dataframe for machine learning
 region_dfs = {}

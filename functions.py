@@ -271,6 +271,20 @@ def rm_month(da, month):
         raise ValueError("Month must be integer between 1 and 12")
     return da.where(da.time.dt.month != month)
 
+# Prepare demand data
+def remove_time(da, weekend=False, xmas=False, month=0):
+    """
+    Returns da with weekends, xmas, or a month removed if desired
+    """
+    if weekend:
+        da = rm_weekend(da)
+    if xmas:
+        da = rm_xmas(da)
+    if month > 0:
+        da = rm_month(da, month)
+        
+    return da.dropna("time")
+
 def get_filename(
     filename, market, region, mask_name,
     first_train_year, last_train_year, first_test_year, last_test_year,
