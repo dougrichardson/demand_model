@@ -300,7 +300,7 @@ def remove_time(da, weekend=False, xmas=False, month=0):
 def get_filename(
     filename, market, region, mask_name,
     first_train_year, last_train_year, first_test_year, last_test_year,
-    weekend=False, xmas=False, month=None, nFeatures=None
+    weekend=False, xmas=False, month=None, nFeatures=None, t_only
 ):
     """
     Return a filename appropriate for the modelling choices made.
@@ -318,6 +318,9 @@ def get_filename(
     
     if nFeatures is not None:
         filename = filename + "_nFeatures-" + nFeatures
+        
+    if t_only:
+        filename = filename + "_t2m_only"
     
     return filename
 

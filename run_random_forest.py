@@ -47,6 +47,7 @@ LAST_TRAIN_YEAR = int(sys.argv[11]) #2011
 FIRST_TEST_YEAR = int(sys.argv[12]) #2012
 LAST_TEST_YEAR = int(sys.argv[13]) #2012
 N_FEATURES = sys.argv[14] # "best" or "parsimonious". For feature selection
+T_ONLY = sys.argv[15] # Bool. If True, uses t2m as only predictor (baseline model)
 
 # Convert str to required type
 # Str to bool
@@ -59,6 +60,11 @@ if REMOVE_XMAS == "True":
     REMOVE_XMAS = True
 else:
     REMOVE_XMAS = False
+    
+if T_ONLY == "True":
+    T_ONLY = True
+else:
+    T_ONLY = False
 
 # Str to list
 if TIME_COLUMNS == "None":
@@ -66,26 +72,16 @@ if TIME_COLUMNS == "None":
 else:
     TIME_COLUMNS = TIME_COLUMNS.split(",")
 
-# # Prepare demand data
-# def remove_time(da, weekend=False, xmas=False, month=0):
-#     """
-#     Returns da with weekends, xmas, or a month removed if desired
-#     """
-#     if REMOVE_WEEKEND:
-#         da = fn.rm_weekend(da)
-#     if REMOVE_XMAS:
-#         da = fn.rm_xmas(da)
-#     if REMOVE_MONTH > 0:
-#         da = fn.rm_month(da, REMOVE_MONTH)
-        
-#     return da.dropna("time")
-
+    # Demand data
 dem_da = xr.open_dataset(PATH + "data/energy_demand/" + DEMAND_FILE)["demand_stl"]
 dem_da = fn.remove_time(dem_da, REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH)
 dem_da = dem_da.sel(region=REGION).expand_dims({"region": [REGION]})
 
 # Prepare predictors
 files = fn.get_predictor_files(MARKET, MASK_NAME)
+# If temperature only, remove other files
+if T_ONLY:
+    files = [i for i in files if "2t_e" in i]
 pred_ds = xr.open_mfdataset(files, combine="nested", compat="override")
 pred_ds = pred_ds.sel(region=REGION).expand_dims({"region": [REGION]}).compute()
 pred_ds = fn.remove_time(pred_ds, REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH)
@@ -155,7 +151,7 @@ results_df["selected_features"] = [len(i) == len(selected_features) for i in res
 filename = fn.get_filename(
     "feature_selection_results", MARKET, REGION, MASK_NAME,
     FIRST_TRAIN_YEAR, LAST_TRAIN_YEAR, FIRST_TEST_YEAR, LAST_TEST_YEAR,
-    REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH, N_FEATURES
+    REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH, N_FEATURES, T_ONLY
 )
 
 results_df.to_csv(
@@ -213,7 +209,7 @@ best_params_df = pd.Series(
 filename = fn.get_filename(
     "hyperparameters", MARKET, REGION, MASK_NAME,
     FIRST_TRAIN_YEAR, LAST_TRAIN_YEAR, FIRST_TEST_YEAR, LAST_TEST_YEAR,
-    REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH, N_FEATURES
+    REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH, N_FEATURES, T_ONLY
 )
 best_params_df.to_csv(
     PATH + "model_results/hyperparameters/random_forest/" + filename + ".csv",
@@ -241,7 +237,7 @@ train_df = pd.DataFrame(
 filename = fn.get_filename(
     "training_predictions", MARKET, REGION, MASK_NAME,
     FIRST_TRAIN_YEAR, LAST_TRAIN_YEAR, FIRST_TEST_YEAR, LAST_TEST_YEAR,
-    REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH, N_FEATURES
+    REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH, N_FEATURES, T_ONLY
 )
 train_df.to_csv(
     PATH + "model_results/training/random_forest/" + filename + ".csv",
@@ -256,7 +252,7 @@ test_df = pd.DataFrame(
 filename = fn.get_filename(
     "test_predictions", MARKET, REGION, MASK_NAME,
     FIRST_TRAIN_YEAR, LAST_TRAIN_YEAR, FIRST_TEST_YEAR, LAST_TEST_YEAR,
-    REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH, N_FEATURES
+    REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH, N_FEATURES, T_ONLY
 )
 test_df.to_csv(
     PATH + "model_results/test/random_forest/" + filename + ".csv",
