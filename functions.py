@@ -1,6 +1,7 @@
 import xarray as xr
 import pandas as pd
 import numpy as np
+import math
 import glob
 
 from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
@@ -377,3 +378,15 @@ def detrend_dim(da, dim, deg=1):
     p = da.polyfit(dim=dim, deg=deg)
     fit = xr.polyval(da[dim], p.polyfit_coefficients)
     return da - fit
+
+def roundup(x, nearest):
+    """
+    Round up to nearest integer
+    """
+    return int(math.ceil(x / nearest)) * nearest
+
+def rounddown(x, nearest):
+    """
+    Round down to nearest integer
+    """
+    return int(math.floor(x / nearest)) * nearest
