@@ -31,7 +31,16 @@ def sel_train_test(df, first_train_year, last_test_year):
     df: dataframe
     first_train_year, last_test_year: int, first year of training set and last year of test set
     """
-    return df[(df.index.year >= first_train_year) & (df.index.year <= last_test_year)]
+    if first_train_year < last_test_year:
+        fy = first_train_year
+        ly = last_test_year
+    elif first_train_year > last_test_year: # If test period is before training period
+        fy = last_test_year
+        ly = first_train_year
+    else:
+        raise ValueError("first training year cannot equal last testing year")
+        
+    return df[(df.index.year >= fy) & (df.index.year <= ly)]
 
 def split(df, target_name, test_size, random_state, shuffle=True):
     """
@@ -309,27 +318,45 @@ def get_filename(
     
     return filename
 
-# def read_results(
-#     path,
-#     filename, market, regions, mask_name,
-#     first_train_year, last_train_year, first_test_year, last_test_year,
-#     weekend=False, xmas=False, month=None, nFeatures=None
-# ):
-#     """
-#     Read in results dataframes as dictionary items
-#     """
-#     results = dict()
-#     for r in regions:
-#         filename = get_filename(
-#             filename, market, r, mask_name,
-#             first_train_year, last_train_year, first_test_year, last_test_year,
-#             weekend, xmas, month, nFeatures
-#         )
-#         results[r] = pd.read_csv(
-#             path + "/" + filename + "/random_forest/" + filename + ".csv",
-#             index_col=0
-#         )
-#     return results
+
+def read_results(results_name, market, regions, mask_name,
+                 first_train_year, last_train_year, first_test_year,
+                 last_test_year, rm_weekend, rm_xmas, rm_month,
+                 n_features, results_path):
+    """
+    Read in results dataframes as dictionary items
+    """
+    if results_name == "feature_selection":
+        name = "feature_selection_results"
+    elif (results_name == "training") | (results_name == "test"):
+        name = results_name + "_predictions"
+    else:
+        name = results_name
+        
+    results = dict()
+    for r in regions:
+        filename = get_filename(
+            name, market, r, mask_name,
+            first_train_year, last_train_year, first_test_year, last_test_year,
+            rm_weekend, rm_xmas, rm_month, n_features
+        )
+        results[r] = pd.read_csv(
+            results_path + results_name + "/random_forest/" + filename + ".csv",
+            index_col=0
+        )
+    return results
+
+def sel_model(df):
+    """
+    Select best model from df
+    """
+    return df.loc[df["selected_features"] == True]
+
+def parse_features(row):
+    """
+    Parse object to list of strings
+    """
+    return row.values[0].split("'")[1::2]
 
 # =======================================
 # Data wrangling
