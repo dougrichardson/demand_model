@@ -325,7 +325,7 @@ def get_filename(
 def read_results(results_name, market, regions, mask_name,
                  first_train_year, last_train_year, first_test_year,
                  last_test_year, rm_weekend, rm_xmas, rm_month,
-                 n_features, results_path):
+                 n_features, results_path, detrended=False):
     """
     Read in results dataframes as dictionary items
     """
@@ -343,6 +343,8 @@ def read_results(results_name, market, regions, mask_name,
             first_train_year, last_train_year, first_test_year, last_test_year,
             rm_weekend, rm_xmas, rm_month, n_features
         )
+        if detrended:
+            filename = filename + "_detrended"
         results[r] = pd.read_csv(
             results_path + results_name + "/random_forest/" + filename + ".csv",
             index_col=0
