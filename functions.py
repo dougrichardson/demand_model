@@ -187,7 +187,7 @@ def print_perm_imp(perm_imp, features):
 # Reading and preparing data
 # =======================================
 
-def get_predictor_files(region, mask):
+def get_predictor_files(region, mask, detrended=True):
     """
     Return a list of desired predictor filenames/
     
@@ -196,7 +196,9 @@ def get_predictor_files(region, mask):
     """
     path = "/g/data/w42/dr6273/work/projects/Aus_energy/"
     ext = region + "_" + mask
-    return glob.glob(path + "demand_predictors/*" + ext + "*")
+    if detrended:
+        ext = ext + "_detrended"
+    return glob.glob(path + "demand_predictors/*" + ext + ".nc")
 
 def to_dataframe(target_da, predictors_ds, region):
     """
