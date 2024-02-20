@@ -47,7 +47,7 @@ LAST_TRAIN_YEAR = int(sys.argv[11]) #2011
 FIRST_TEST_YEAR = int(sys.argv[12]) #2012
 LAST_TEST_YEAR = int(sys.argv[13]) #2012
 N_FEATURES = sys.argv[14] # "best" or "parsimonious". For feature selection
-T_ONLY = sys.argv[15] # Bool. If True, uses t2m as only predictor (baseline model)
+T_ONLY = sys.argv[15] # Bool. If True, uses t2m as only temperature predictor
 
 # Convert str to required type
 # Str to bool
@@ -79,9 +79,11 @@ dem_da = dem_da.sel(region=REGION).expand_dims({"region": [REGION]})
 
 # Prepare predictors
 files = fn.get_predictor_files(MARKET, MASK_NAME)
-# If temperature only, remove other files
-if T_ONLY:
-    files = [i for i in files if "2t_e" in i]
+
+# # If temperature only, remove other files (used for old iteration with t2m on ONLY variable, not just only temperature variable
+# if T_ONLY:
+#     files = [i for i in files if "2t_e" in i]
+
 pred_ds = xr.open_mfdataset(files, combine="nested", compat="override")
 pred_ds = pred_ds.sel(region=REGION).expand_dims({"region": [REGION]}).compute()
 pred_ds = fn.remove_time(pred_ds, REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH)
@@ -90,15 +92,20 @@ pred_ds = fn.remove_time(pred_ds, REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH)
 region_dfs = {}
 for region in dem_da.region.values:
     df = fn.to_dataframe(dem_da, pred_ds, region)
+    
     for t in TIME_COLUMNS:
         df = fn.add_time_column(df, t)
-    new_cols = np.append(np.append("demand", TIME_COLUMNS), df.columns[:-(len(TIME_COLUMNS) + 1)])
+        
+    if T_ONLY:
+        new_cols = np.append(np.append("demand", TIME_COLUMNS), ["mtpr", "w10", "msdwswrf", "rh", "q", "t2m"])
+    else:
+        new_cols = np.append(np.append("demand", TIME_COLUMNS), df.columns[:-(len(TIME_COLUMNS) + 1)])
     df = df[new_cols]
+    
     region_dfs[region] = df
-# region_dfs[REGION] = region_dfs[REGION][["demand", "hdd", "cdd"]]
 
+    
 # Split data into training and testing
-
 test_len = dem_da.sel(time=slice(str(FIRST_TEST_YEAR), str(LAST_TEST_YEAR))).time.values.shape[0]
 
 train_X, test_X, train_y, test_y = fn.split(
