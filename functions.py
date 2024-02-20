@@ -328,7 +328,7 @@ def get_filename(
 def read_results(results_name, market, regions, mask_name,
                  first_train_year, last_train_year, first_test_year,
                  last_test_year, rm_weekend, rm_xmas, rm_month,
-                 n_features, results_path, detrended=False):
+                 n_features, results_path, detrended=False, t_only=False):
     """
     Read in results dataframes as dictionary items
     """
@@ -344,7 +344,7 @@ def read_results(results_name, market, regions, mask_name,
         filename = get_filename(
             name, market, r, mask_name,
             first_train_year, last_train_year, first_test_year, last_test_year,
-            rm_weekend, rm_xmas, rm_month, n_features
+            rm_weekend, rm_xmas, rm_month, n_features, t_only
         )
         if detrended:
             filename = filename + "_detrended"
