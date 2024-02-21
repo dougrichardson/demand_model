@@ -253,11 +253,17 @@ def add_time_column(df, method):
     df[method] = new_col
     return df
 
-def get_calendar(region, subregion):
+def get_calendar(market, subregion):
     """
-    Get calendar for subregion
+    Get calendar for subregion, using electricity market names
     """
-    return registry.get_subregions(region)[subregion]()
+    if market == "NEM":
+        if subregion == "NEM": # If entire market, use only national holidays
+            return registry.get("AU")()
+        region = "AU"
+    else:
+        raise ValueError("Incorrect market specified")
+    return registry.get_subregions(region)[region + "-" + subregion]()
 
 def rm_weekend(da, drop=False):
     """

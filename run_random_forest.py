@@ -71,10 +71,15 @@ if TIME_COLUMNS == "None":
     TIME_COLUMNS = []
 else:
     TIME_COLUMNS = TIME_COLUMNS.split(",")
+    
+if REMOVE_WEEKEND:
+    CALENDAR = fn.get_calendar(MARKET, REGION)
+else:
+    CALENDAR = None
 
     # Demand data
 dem_da = xr.open_dataset(PATH + "data/energy_demand/" + DEMAND_FILE)["demand_stl"]
-dem_da = fn.remove_time(dem_da, REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH)
+dem_da = fn.remove_time(dem_da, REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH, calendar=CALENDAR)
 dem_da = dem_da.sel(region=REGION).expand_dims({"region": [REGION]})
 
 # Prepare predictors
@@ -86,7 +91,7 @@ files = fn.get_predictor_files(MARKET, MASK_NAME)
 
 pred_ds = xr.open_mfdataset(files, combine="nested", compat="override")
 pred_ds = pred_ds.sel(region=REGION).expand_dims({"region": [REGION]}).compute()
-pred_ds = fn.remove_time(pred_ds, REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH)
+pred_ds = fn.remove_time(pred_ds, REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH, calendar=CALENDAR)
 
 # Prepare dataframe for machine learning
 region_dfs = {}
