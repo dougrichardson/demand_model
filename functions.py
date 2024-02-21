@@ -4,6 +4,8 @@ import numpy as np
 import math
 import glob
 
+from workalendar.registry import registry
+
 from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
 
 from sklearn.model_selection import train_test_split
@@ -251,11 +253,25 @@ def add_time_column(df, method):
     df[method] = new_col
     return df
 
+def get_calendar(region, subregion):
+    """
+    Get calendar for subregion
+    """
+    return registry.get_subregions(region)[subregion]()
+
 def rm_weekend(da, drop=False):
     """
     Set weekend days to NaN
     """
     return da.where(da.time.dt.dayofweek < 5, drop=drop)
+
+def select_workday(da, calendar, drop=False):
+    """
+    Remove weekends and public holidays
+    """
+    is_workday = [calendar.is_working_day(pd.to_datetime(i)) for i in da["time"].values]
+    da = da.assign_coords({"is_workday": ("time", is_workday)})
+    return da.where(da.is_workday == True, drop=drop)
 
 def rm_xmas(da):
     """
@@ -284,12 +300,13 @@ def rm_month(da, month):
     return da.where(da.time.dt.month != month)
 
 # Prepare demand data
-def remove_time(da, weekend=False, xmas=False, month=0):
+def remove_time(da, weekend=False, xmas=False, month=0, calendar=None):
     """
     Returns da with weekends, xmas, or a month removed if desired
     """
     if weekend:
-        da = rm_weekend(da)
+        # da = rm_weekend(da)
+        da = select_workday(da, calendar)
     if xmas:
         da = rm_xmas(da)
     if month > 0:
