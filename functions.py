@@ -305,7 +305,6 @@ def rm_month(da, month):
         raise ValueError("Month must be integer between 1 and 12")
     return da.where(da.time.dt.month != month)
 
-# Prepare demand data
 def remove_time(da, weekend=False, xmas=False, month=0, calendar=None):
     """
     Returns da with weekends, xmas, or a month removed if desired
@@ -390,7 +389,7 @@ def parse_features(row):
     return row.values[0].split("'")[1::2]
 
 # =======================================
-# Data wrangling
+# Misc
 # =======================================
 
 def detrend_dim(da, dim, deg=1):

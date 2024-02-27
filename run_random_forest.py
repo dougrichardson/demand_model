@@ -6,6 +6,7 @@
 # =================================
 
 # Import libraries
+# ================================
 import sys
 import os
 import glob
@@ -27,6 +28,8 @@ os.chdir('/g/data/w42/dr6273/work/demand_model/')
 import functions as fn
 
 # Set global variables
+# ================================
+
 PATH = sys.argv[1] # "/g/data/w42/dr6273/work/projects/Aus_energy/"
 DEMAND_FILE = sys.argv[2] #"daily_demand_2010-2020_stl.nc"
 MARKET = sys.argv[3] #"NEM" # "NEM" or "EU"
@@ -77,23 +80,24 @@ if REMOVE_WEEKEND:
 else:
     CALENDAR = None
 
-    # Demand data
+# Prepare demand data
+# ================================
+
 dem_da = xr.open_dataset(PATH + "data/energy_demand/" + DEMAND_FILE)["demand_stl"]
 dem_da = fn.remove_time(dem_da, REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH, calendar=CALENDAR)
 dem_da = dem_da.sel(region=REGION).expand_dims({"region": [REGION]})
 
 # Prepare predictors
+# ================================
+
 files = fn.get_predictor_files(MARKET, MASK_NAME)
-
-# # If temperature only, remove other files (used for old iteration with t2m on ONLY variable, not just only temperature variable
-# if T_ONLY:
-#     files = [i for i in files if "2t_e" in i]
-
 pred_ds = xr.open_mfdataset(files, combine="nested", compat="override")
 pred_ds = pred_ds.sel(region=REGION).expand_dims({"region": [REGION]}).compute()
 pred_ds = fn.remove_time(pred_ds, REMOVE_WEEKEND, REMOVE_XMAS, REMOVE_MONTH, calendar=CALENDAR)
 
 # Prepare dataframe for machine learning
+# ================================
+
 region_dfs = {}
 for region in dem_da.region.values:
     df = fn.to_dataframe(dem_da, pred_ds, region)
@@ -111,6 +115,8 @@ for region in dem_da.region.values:
 
     
 # Split data into training and testing
+# ================================
+
 test_len = dem_da.sel(time=slice(str(FIRST_TEST_YEAR), str(LAST_TEST_YEAR))).time.values.shape[0]
 
 train_X, test_X, train_y, test_y = fn.split(
@@ -122,10 +128,13 @@ train_X, test_X, train_y, test_y = fn.split(
 )
 
 # Sequential feature selection
+# ================================
+
 rf = ExtraTreesRegressor(
     random_state=0
 )
 
+# Cross-validation leaving out one year at a time
 logo = fn.leave_one_group_out(
     train_X,
     train_y,
@@ -144,6 +153,7 @@ model = fn.mlextend_sfs(
     k_features=N_FEATURES
 )
 
+# Organise model results
 features = region_dfs[region].columns[1:]
 selected_features = list(features[list(model.k_feature_idx_)])
 
@@ -171,7 +181,7 @@ results_df.to_csv(
 )
 
 #  Tune hyperparameters
-# Using leave one group out cross validation, where a group is a year.
+# ================================
 parameters = {
     "n_estimators": randint(200, 500), # no. trees in the forest
     "min_samples_leaf": randint(5, 30), # min no. samples at leaf node
@@ -209,15 +219,13 @@ logo = fn.leave_one_group_out(
     str(LAST_TRAIN_YEAR)
 )
 
-# !!!!!!!!!!!!!!!!!!!!!!!!! CHANGE n_iter for actual runs
-# ========================= !!!!!!!!!!!!!!!!!!!!!!
-# ========================= !!!!!!!!!!!!!!!!!!!!!!
 best_params = fn.tune_hyperparameters(train_X, train_y, rf, parameters, logo, n_iter=200)
 best_params_df = pd.Series(
     [best_params[i] for i in list(best_params.keys())],
     index=list(best_params.keys())
 )
 
+# Write results
 filename = fn.get_filename(
     "hyperparameters", MARKET, REGION, MASK_NAME,
     FIRST_TRAIN_YEAR, LAST_TRAIN_YEAR, FIRST_TEST_YEAR, LAST_TEST_YEAR,
@@ -227,7 +235,9 @@ best_params_df.to_csv(
     PATH + "model_results/hyperparameters/random_forest/" + filename + ".csv",
 )
 
-# Finalise model
+# Final model
+# ================================
+
 rf = ExtraTreesRegressor(
     n_estimators=best_params["n_estimators"],
     min_samples_leaf=best_params["min_samples_leaf"],
@@ -236,6 +246,7 @@ rf = ExtraTreesRegressor(
     random_state=0,
 )
 
+# predictions
 model_train, pred_train = fn.predict_forest(train_y, train_X, train_X, rf)
 model_test, pred_test = fn.predict_forest(train_y, train_X, test_X, rf)
 
