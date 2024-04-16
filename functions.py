@@ -372,7 +372,8 @@ def read_results(results_name, market, regions, mask_name,
             filename = filename + "_detrended"
         results[r] = pd.read_csv(
             results_path + results_name + "/random_forest/" + filename + ".csv",
-            index_col=0
+            index_col=0,
+            parse_dates=True
         )
     return results
 
