@@ -14,7 +14,8 @@
 module load parallel
 conda activate pangeo_ML
 
-INPUTS=/g/data/w42/dr6273/work/demand_model/parallel_inputs.txt
+# INPUTS=/g/data/w42/dr6273/work/demand_model/parallel_inputs.txt
+INPUTS=/g/data/w42/dr6273/work/demand_model/parallel_inputs_redo_isweekend.txt
 
 # Declare an empty array. This array will store the contents of the input file.
 declare -a array
