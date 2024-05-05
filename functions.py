@@ -226,17 +226,23 @@ def to_dataframe(target_da, predictors_ds, region):
     
     return df
 
-def add_time_column(df, method):
+def add_time_column(df, method, calendar=None):
     """
     Add a time column to df.
     
     df: dataframe to add to
     method: str indicating which method to use. Currently 'is_weekend',
             'month_sin', 'month_cos', 'month_int', 'season_int'
+    calendar: None, or calendar from registry
     """
     if method == "is_weekend":
         # Bool for weekend day or weekday
-        new_col = (df.index.weekday > 4).astype("int16")
+        # new_col = (df.index.weekday > 4).astype("int16")
+        
+        # Bool for weekend/public holiday or working day
+        is_workday = [calendar.is_working_day(pd.to_datetime(i)) for i in df.index.values]
+        is_workday = [0 if i else 1 for i in is_workday] # Swap 1s and 0s
+        new_col = np.array(is_workday).astype("int16")
     elif method == "is_transition":
         new_col = df.index.month.isin([3, 4, 5, 9, 10, 11])
     elif method == "month_sin":
