@@ -75,10 +75,11 @@ if TIME_COLUMNS == "None":
 else:
     TIME_COLUMNS = TIME_COLUMNS.split(",")
     
-if REMOVE_WEEKEND:
-    CALENDAR = fn.get_calendar(MARKET, REGION)
-else:
-    CALENDAR = None
+# if REMOVE_WEEKEND:
+#     CALENDAR = fn.get_calendar(MARKET, REGION)
+# else:
+#     CALENDAR = None
+CALENDAR = fn.get_calendar(MARKET, REGION)
 
 # Prepare demand data
 # ================================
@@ -103,7 +104,7 @@ for region in dem_da.region.values:
     df = fn.to_dataframe(dem_da, pred_ds, region)
     
     for t in TIME_COLUMNS:
-        df = fn.add_time_column(df, t)
+        df = fn.add_time_column(df, t, calendar=CALENDAR)
         
     if T_ONLY:
         new_cols = np.append(np.append("demand", TIME_COLUMNS), ["mtpr", "w10", "msdwswrf", "rh", "q", "t2m"])
