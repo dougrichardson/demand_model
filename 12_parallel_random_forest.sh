@@ -5,7 +5,7 @@
 #PBS -l ncpus=24
 #PBS -l mem=4GB
 #PBS -l jobfs=8GB
-#PBS -l walltime=00:45:00
+#PBS -l walltime=01:35:00
 #PBS -l wd
 #PBS -l storage=gdata/w42
 #PBS -e ./logs/error.txt
@@ -14,8 +14,7 @@
 module load parallel
 conda activate pangeo_ML
 
-# INPUTS=/g/data/w42/dr6273/work/demand_model/parallel_inputs.txt
-INPUTS=/g/data/w42/dr6273/work/demand_model/parallel_inputs_redo_isweekend.txt
+INPUTS=/g/data/w42/dr6273/work/demand_model/parallel_inputs.txt
 
 # Declare an empty array. This array will store the contents of the input file.
 declare -a array
