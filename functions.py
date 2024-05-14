@@ -426,3 +426,44 @@ def rounddown(x, nearest):
     Round down to nearest integer
     """
     return int(math.floor(x / nearest)) * nearest
+
+def pretty_variable(var):
+    """
+    Return 'pretty' variable name
+    """
+    if var == "t2m":
+        r = r"$T$"
+    elif var == "t2m3":
+        r = r"$T_{3}$"
+    elif var == "t2m4":
+        r = r"$T_{4}$"
+    elif var == "t2max":
+        r = r"$T_{\mathrm{max}}$"
+    elif var == "t2min":
+        r = r"$T_{\mathrm{min}}$"
+    elif var == "cdd":
+        r = r"$\mathrm{CDD}$"
+    elif var == "cdd3":
+        r = r"$\mathrm{CDD_{3}}$"
+    elif var == "cdd4":
+        r = r"$\mathrm{CDD_{4}}$"
+    elif var == "hdd":
+        r = r"$\mathrm{HDD}$"
+    elif var == "hdd3":
+        r = r"$\mathrm{HDD_{3}}$"
+    elif var == "hdd4":
+        r = r"$\mathrm{HDD_{4}}$"
+    elif var == "w10":
+        r = r"$W$"
+    elif var == "rh":
+        r = r"$h$"
+    elif var == "q":
+        r = r"$q$"
+    elif var == "msdwswrf":
+        r = r"$R$"
+    elif var == "mtpr":
+        r = r"$P$"
+    else:
+        raise ValueError("Incorrect var")
+        
+    return r
