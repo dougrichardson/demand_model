@@ -162,9 +162,18 @@ def compute_scores(y_true, y_pred, metrics):
     for metric in metrics:
         s = metric(y_true, y_pred)
         scores.append(s)
+        
     # Also compute Pearson correlation
     cor = pearsonr(y_true, y_pred)[0]
+    
+    # Difference in standard deviation (of obs and pred)
+    std_true = np.std(y_true)
+    std_pred = np.std(y_pred)
+    std_diff = std_true - std_pred
+    
     scores.append(cor)
+    scores.append(std_diff)
+    
     return scores
 
 def perm_imp(model, X, y, n_repeats, random_state=0):
