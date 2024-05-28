@@ -169,10 +169,14 @@ def compute_scores(y_true, y_pred, metrics):
     # Difference in standard deviation (of obs and pred)
     std_true = np.std(y_true)
     std_pred = np.std(y_pred)
-    std_diff = std_true - std_pred
+    # std_diff = std_true - std_pred
+    
+    # And ratio of standard deviation
+    std_ratio = std_pred / std_true
     
     scores.append(cor)
-    scores.append(std_diff)
+    # scores.append(std_diff)
+    scores.append(std_ratio)
     
     return scores
 
