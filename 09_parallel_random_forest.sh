@@ -30,7 +30,7 @@ done < "$INPUTS" # Specify the input file here
 
 # The printf command is used here to print each element of the array on a new line
 # The array's contents are then piped to the parallel command.
-printf "%s\n" "${array[@]}" | parallel -j ${PBS_NCPUS} --colsep ' ' python 11_run_random_forest.py "{}"
+printf "%s\n" "${array[@]}" | parallel -j ${PBS_NCPUS} --colsep ' ' python 08_run_random_forest.py "{}"
 
 # "%s\n" The %s format specifier tells printf to interpret the arguments as strings, and \n separates the elements with newlines.
 # "${array[@]}" This is a special syntax for accessing all elements of an array.
