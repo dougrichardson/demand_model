@@ -1,2 +1,2 @@
 # demand_model
-Modelling energy demand in Australia
+Codes used for analysis in Richardson et al., Environmental Research Letters, accepted.

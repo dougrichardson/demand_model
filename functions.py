@@ -169,13 +169,11 @@ def compute_scores(y_true, y_pred, metrics):
     # Difference in standard deviation (of obs and pred)
     std_true = np.std(y_true)
     std_pred = np.std(y_pred)
-    # std_diff = std_true - std_pred
     
     # And ratio of standard deviation
     std_ratio = std_pred / std_true
     
     scores.append(cor)
-    # scores.append(std_diff)
     scores.append(std_ratio)
     
     return scores
@@ -183,12 +181,21 @@ def compute_scores(y_true, y_pred, metrics):
 def perm_imp(model, X, y, n_repeats, random_state=0):
     """
     Permutation importances
+    
+    model: sklearn model
+    X: array, predictors
+    y: array, target
+    n_repeats: int, number of iterations
+    random_state: int, pseudo random generator
     """
     return permutation_importance(model, X, y, n_repeats=n_repeats, random_state=random_state)
 
 def print_perm_imp(perm_imp, features):
     """
     Print permutation importance stats
+    
+    perm_imp: output from permutation_importance
+    features: list, feature names
     """
     for i in perm_imp.importances_mean.argsort()[::-1]:
         if perm_imp.importances_mean[i] - 2 * perm_imp.importances_std[i] > 0:
@@ -208,6 +215,7 @@ def get_predictor_files(region, mask, detrended=True):
     
     region: str, name of region
     mask: str, name of mask
+    detrended: bool, whether to load detrended data
     """
     path = "/g/data/w42/dr6273/work/projects/Aus_energy/"
     ext = region + "_" + mask
@@ -218,6 +226,10 @@ def get_predictor_files(region, mask, detrended=True):
 def to_dataframe(target_da, predictors_ds, region):
     """
     Convert xarray data to pandas dataframe.
+    
+    target_da: xarray dataArray
+    predictors_ds: xarray dataset
+    region: str, name of region
     """
     # Predictors to array
     predictors_arr = predictors_ds.sel(region=region, time=target_da["time"]).to_array("variable")
@@ -275,6 +287,9 @@ def add_time_column(df, method, calendar=None):
 def get_calendar(market, subregion):
     """
     Get calendar for subregion, using electricity market names
+    
+    market: str, only "NEM" supported
+    subregion: str, region name
     """
     if market == "NEM":
         if subregion == "NEM": # If entire market, use only national holidays
@@ -287,12 +302,19 @@ def get_calendar(market, subregion):
 def rm_weekend(da, drop=False):
     """
     Set weekend days to NaN
+    
+    da: array
+    drop: bool, whether to drop NaNs
     """
     return da.where(da.time.dt.dayofweek < 5, drop=drop)
 
 def select_workday(da, calendar, drop=False):
     """
     Remove weekends and public holidays
+    
+    da: array
+    calendar: None, or calendar from registry
+    drop: bool, whether to drop NaNs
     """
     is_workday = [calendar.is_working_day(pd.to_datetime(i)) for i in da["time"].values]
     da = da.assign_coords({"is_workday": ("time", is_workday)})
@@ -301,6 +323,8 @@ def select_workday(da, calendar, drop=False):
 def rm_xmas(da):
     """
     Set 21/12 through 06/01 to NaN
+    
+    da: array
     """
     da_ = da.where(
         da.where(
@@ -327,6 +351,11 @@ def rm_month(da, month):
 def remove_time(da, weekend=False, xmas=False, month=0, calendar=None):
     """
     Returns da with weekends, xmas, or a month removed if desired
+    
+    da: array
+    weekend: bool, whether to include weekends/public holidays
+    xmas: bool, whether to include Christmas period
+    calendar: None, or calendar from registry
     """
     if weekend:
         # da = rm_weekend(da)
@@ -399,6 +428,8 @@ def read_results(results_name, market, regions, mask_name,
 def sel_model(df):
     """
     Select best model from df
+    
+    df: dataFrame
     """
     return df.loc[df["selected_features"] == True]
 
@@ -443,6 +474,8 @@ def rounddown(x, nearest):
 def pretty_variable(var):
     """
     Return 'pretty' variable name
+    
+    var: str
     """
     if var == "t2m":
         r = r"$T$"
